@@ -193,28 +193,11 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
 
     window.location.href = "../index.html";
   } catch (error) {
-    if (error.code === "auth/user-not-found") {
-      Swal.fire({
-        icon: "error",
-        title: "User Not Found",
-      });
-    } else if (error.code === "auth/wrong-password") {
-      Swal.fire({
-        icon: "error",
-        title: "Wrong Password",
-      });
-    } else if (error.code === "auth/invalid-credential") {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Credential",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: error.message,
-      });
-    }
+    Swal.fire({
+      icon: "error",
+      title: "Login Failed",
+      text: "Login Failed",
+    });
   }
 });
 

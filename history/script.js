@@ -111,7 +111,13 @@ const listenToHistory = () => {
       const newStock = history.newStock || "—";
       const reason = history.reason || "—";
       const adminName = history.adminName || "—";
-      const createdAt = history.createdAt?.toDate().toLocaleString() || "—";
+      const createdAtRaw = history.createdAt?.toDate?.() || null;
+
+      const createdAtDisplay = createdAtRaw
+        ? createdAtRaw.toLocaleString()
+        : "—";
+
+      tr.dataset.createdAt = createdAtRaw ? createdAtRaw.toISOString() : "";
 
       tr.innerHTML = `
         <td>${productName}</td>
@@ -121,7 +127,7 @@ const listenToHistory = () => {
         <td>${newStock}</td>
         <td>${reason}</td>
         <td>${adminName}</td>
-        <td>${createdAt}</td>
+        <td>${createdAtDisplay}</td>
       `;
 
       tableBody.appendChild(tr);
@@ -240,6 +246,7 @@ window.addEventListener("DOMContentLoaded", () => {
       .value.toLowerCase();
 
     const actionFilter = document.getElementById("actionFilter").value;
+    const filterDate = document.getElementById("filterDate").value;
 
     const rows = document.querySelectorAll("#historyTableBody tr");
 
@@ -253,12 +260,35 @@ window.addEventListener("DOMContentLoaded", () => {
       const actionText = actionCell.textContent.trim();
 
       const matchesSearch = nameText.includes(searchFilter);
-
       const matchesAction = actionFilter === "" || actionText === actionFilter;
 
-      row.style.display = matchesSearch && matchesAction ? "" : "none";
+      let matchesDate = true;
+
+      const rowDate = row.dataset.createdAt;
+
+      if (filterDate && rowDate) {
+        const selected = new Date(filterDate);
+        const rowTime = new Date(rowDate);
+
+        matchesDate =
+          rowTime.getFullYear() === selected.getFullYear() &&
+          rowTime.getMonth() === selected.getMonth() &&
+          rowTime.getDate() === selected.getDate();
+      }
+
+      row.style.display =
+        matchesSearch && matchesAction && matchesDate ? "" : "none";
     });
   };
+
+  document
+    .getElementById("filterDate")
+    .addEventListener("change", applyFilters);
+
+  document.getElementById("clearDate").addEventListener("click", () => {
+    document.getElementById("filterDate").value = "";
+    applyFilters();
+  });
 
   document
     .getElementById("searchInput")

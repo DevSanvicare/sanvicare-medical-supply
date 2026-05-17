@@ -66,160 +66,152 @@ function validatePassword(password) {
 // ===============================
 // SIGN UP
 // ===============================
-document
-  .querySelector(".card-back .btn")
-  .addEventListener("click", async (e) => {
-    e.preventDefault();
+document.getElementById("signup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const name = document.getElementById("signup-name").value.trim();
-    const email = document.getElementById("signup-email").value.trim();
-    const password = document.getElementById("signup-password").value.trim();
+  const name = document.getElementById("signup-name").value.trim();
+  const email = document.getElementById("signup-email").value.trim();
+  const password = document.getElementById("signup-password").value.trim();
 
-    if (!name || !email || !password) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "Please fill all fields",
-      });
-    }
+  if (!name || !email || !password) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Missing Fields",
+      text: "Please fill all fields",
+    });
+  }
 
-    if (!validateEmail(email)) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Invalid Email",
-        text: "Please enter a valid email format",
-      });
-    }
+  if (!validateEmail(email)) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Please enter a valid email format",
+    });
+  }
 
-    if (!validatePassword(password)) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Weak Password",
-        text: "Password must be at least 6 characters",
-      });
-    }
+  if (!validatePassword(password)) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Weak Password",
+      text: "Password must be at least 6 characters",
+    });
+  }
 
-    try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
+  try {
+    const result = await createUserWithEmailAndPassword(auth, email, password);
 
-      const user = result.user;
+    const user = result.user;
 
-      // SAVE TO FIRESTORE (admins table)
-      await setDoc(doc(db, "admins", user.uid), {
+    // SAVE TO FIRESTORE (admins table)
+    await setDoc(doc(db, "admins", user.uid), {
+      uid: user.uid,
+      name: name,
+      email: email,
+      createdAt: serverTimestamp(),
+    });
+
+    // LOCAL STORAGE
+    localStorage.setItem(
+      "sanvicareUser",
+      JSON.stringify({
+        email: user.email,
         uid: user.uid,
         name: name,
-        email: email,
-        createdAt: serverTimestamp(),
+      }),
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Signup Successful",
+      text: "Your account has been created",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+
+    window.location.href = "../index.html";
+  } catch (error) {
+    if (error.code === "auth/email-already-in-use") {
+      Swal.fire({
+        icon: "error",
+        title: "Email Already Exists",
+        text: "Try logging in instead",
       });
-
-      // LOCAL STORAGE
-      localStorage.setItem(
-        "sanvicareUser",
-        JSON.stringify({
-          email: user.email,
-          uid: user.uid,
-          name: name,
-        }),
-      );
-
-      await Swal.fire({
-        icon: "success",
-        title: "Signup Successful",
-        text: "Your account has been created",
-        timer: 1200,
-        showConfirmButton: false,
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Signup Failed",
+        text: error.message,
       });
-
-      window.location.href = "../index.html";
-    } catch (error) {
-      if (error.code === "auth/email-already-in-use") {
-        Swal.fire({
-          icon: "error",
-          title: "Email Already Exists",
-          text: "Try logging in instead",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Signup Failed",
-          text: error.message,
-        });
-      }
     }
-  });
+  }
+});
 
 // ===============================
 // LOGIN
 // ===============================
-document
-  .querySelector(".card-front .btn")
-  .addEventListener("click", async (e) => {
-    e.preventDefault();
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value.trim();
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-    if (!email || !password) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "Please fill all fields",
+  if (!email || !password) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Missing Fields",
+      text: "Please fill all fields",
+    });
+  }
+
+  if (!validateEmail(email)) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Enter a valid email",
+    });
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+
+    const user = auth.currentUser;
+
+    localStorage.setItem(
+      "sanvicareUser",
+      JSON.stringify({
+        email: user.email,
+        uid: user.uid,
+      }),
+    );
+
+    await Swal.fire({
+      icon: "success",
+      title: "Login Successful",
+      timer: 1000,
+      showConfirmButton: false,
+    });
+
+    window.location.href = "../index.html";
+  } catch (error) {
+    if (error.code === "auth/user-not-found") {
+      Swal.fire({
+        icon: "error",
+        title: "User Not Found",
+      });
+    } else if (error.code === "auth/wrong-password") {
+      Swal.fire({
+        icon: "error",
+        title: "Wrong Password",
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: error.message,
       });
     }
-
-    if (!validateEmail(email)) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Invalid Email",
-        text: "Enter a valid email",
-      });
-    }
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-
-      const user = auth.currentUser;
-
-      localStorage.setItem(
-        "sanvicareUser",
-        JSON.stringify({
-          email: user.email,
-          uid: user.uid,
-        }),
-      );
-
-      await Swal.fire({
-        icon: "success",
-        title: "Login Successful",
-        timer: 1000,
-        showConfirmButton: false,
-      });
-
-      window.location.href = "../index.html";
-    } catch (error) {
-      if (error.code === "auth/user-not-found") {
-        Swal.fire({
-          icon: "error",
-          title: "User Not Found",
-        });
-      } else if (error.code === "auth/wrong-password") {
-        Swal.fire({
-          icon: "error",
-          title: "Wrong Password",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: error.message,
-        });
-      }
-    }
-  });
+  }
+});
 
 // ===============================
 // AUTH STATE

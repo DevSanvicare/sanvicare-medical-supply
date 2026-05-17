@@ -40,7 +40,7 @@ const db = getFirestore(app);
 const savedUser = localStorage.getItem("sanvicareUser");
 
 if (!savedUser) {
-  window.location.href = "/sanvicare-medical-supply/auth/";
+  window.location.href = "./sanvicare-medical-supply/auth/";
 }
 
 function updateNavPadding() {
@@ -220,7 +220,7 @@ function attachActionButtons() {
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "/sanvicare-medical-supply/auth/";
+    window.location.href = "./sanvicare-medical-supply/auth/";
   } else {
     document.getElementById("container").style.visibility = "visible";
     try {
@@ -293,7 +293,7 @@ window.addEventListener("DOMContentLoaded", () => {
       try {
         await signOut(auth);
         localStorage.removeItem("sanvicareUser");
-        window.location.href = "/sanvicare-medical-supply/auth/";
+        window.location.href = "./sanvicare-medical-supply/auth/";
       } catch (error) {
         console.error("Logout error:", error);
         Swal.fire({

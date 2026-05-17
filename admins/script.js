@@ -123,7 +123,7 @@ const listenToAdmins = () => {
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "../login-register.html";
+    window.location.href = "../auth/";
   } else {
     document.getElementById("container").style.visibility = "visible";
     try {

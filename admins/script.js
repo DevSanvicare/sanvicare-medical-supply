@@ -40,7 +40,7 @@ const db = getFirestore(app);
 const savedUser = localStorage.getItem("sanvicareUser");
 
 if (!savedUser) {
-  window.location.href = "../auth/";
+  window.location.href = "/auth/";
 }
 
 function updateNavPadding() {
@@ -123,7 +123,7 @@ const listenToAdmins = () => {
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.href = "../auth/";
+    window.location.href = "/auth/";
   } else {
     document.getElementById("container").style.visibility = "visible";
     try {
@@ -196,7 +196,7 @@ window.addEventListener("DOMContentLoaded", () => {
       try {
         await signOut(auth);
         localStorage.removeItem("sanvicareUser");
-        window.location.href = "../auth/";
+        window.location.href = "/auth/";
       } catch (error) {
         console.error("Logout error:", error);
         Swal.fire({

@@ -130,19 +130,11 @@ document.getElementById("signup-form").addEventListener("submit", async (e) => {
 
     window.location.href = "../index.html";
   } catch (error) {
-    if (error.code === "auth/email-already-in-use") {
-      Swal.fire({
-        icon: "error",
-        title: "Email Already Exists",
-        text: "Try logging in instead",
-      });
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Signup Failed",
-        text: error.message,
-      });
-    }
+    Swal.fire({
+      icon: "error",
+      title: "Signup Failed",
+      text: "Signup Failed",
+    });
   }
 });
 

@@ -203,6 +203,11 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
         icon: "error",
         title: "Wrong Password",
       });
+    } else if (error.code === "auth/invalid-credential") {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Credential",
+      });
     } else {
       Swal.fire({
         icon: "error",

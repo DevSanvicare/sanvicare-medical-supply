@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sanvicare - Admins</title>
+
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="./images/favicon.ico" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="./script.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <nav>
+            <div class="logo-name">
+                <div class="logo-image">
+                    <img id="userAvatar" src="https://api.dicebear.com/9.x/adventurer/svg?flip=true&seed=Jocelyn"
+                        alt="Profile">
+                </div>
+                <span class="logo_name" id="userNameDisplay"><span class="spinner"></span></span>
+            </div>
+            <div class="menu-items">
+                <ul class="nav-links">
+                    <li><a href="../index.html">
+                            <i class="uil uil-estate"></i>
+                            <span class="link-name">Dashboard</span>
+                        </a></li>
+                    <li><a href="../products/">
+                            <i class="uil uil-store"></i>
+                            <span class="link-name">Products</span>
+                        </a></li>
+                    <li><a href="../notifications/">
+                            <i class="uil uil-bell"></i>
+                            <span class="link-name">Notifications</span>
+                        </a></li>
+                    <li><a href="../history/">
+                            <i class="uil uil-history"></i>
+                            <span class="link-name">History</span>
+                        </a></li>
+                    <li><a href="../admins/" class="active">
+                            <i class="uil uil-users-alt"></i>
+                            <span class="link-name">Admins</span>
+                        </a></li>
+                </ul>
+                <ul class="logout-mode">
+                    <li>
+                        <div>
+                            <i class="uil uil-signout" id="logoutIcon"></i>
+                            <button class="link-name logout-button" id="logoutBtn">Logout</button>
+                        </div>
+                    </li>
+                    <li class="mode">
+                        <a>
+                            <i class="uil uil-moon"></i>
+                            <span class="link-name">Dark Mode</span>
+                        </a>
+                        <div class="mode-toggle">
+                            <span class="switch"></span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <section class="dashboard">
+            <div class="top">
+                <i class="uil uil-bars sidebar-toggle"></i>
+            </div>
+            <div class="dash-content">
+                <div class="activity">
+                    <div class="title">
+                        <div class="title-header">
+                            <i class="uil uil-location-point icon-title"></i>
+                            <span class="text">Admins Management</span>
+                        </div>
+
+                        <div class="title-actions">
+                            <!-- Search Bar -->
+                            <div class="search-box">
+                                <input type="text" id="searchInput" placeholder="Search by Name">
+                                <button id="searchBtn">
+                                    <i class="uil uil-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="table-container">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminsTableBody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+
+</html>

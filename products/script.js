@@ -334,110 +334,151 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("modal-open");
   });
 
+  let isSubmitting = false;
+
   document
     .getElementById("addProductForm")
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const productName = document
-        .getElementById("addProductName")
-        .value.trim();
-      const brand = document.getElementById("addBrand").value.trim();
-      const location = document.getElementById("addLocation").value.trim();
+      if (isSubmitting) return;
 
-      // check duplicates (active only)
-      const existingQuery = query(collection(db, "products"));
-      const snapshot = await getDocs(existingQuery);
+      const submitBtn = e.target.querySelector("button[type='submit']");
+      isSubmitting = true;
 
-      const duplicate = snapshot.docs.find((d) => {
-        const data = d.data();
-        return (
-          data.productName?.toLowerCase() === productName.toLowerCase() &&
-          data.brand?.toLowerCase() === brand.toLowerCase() &&
-          data.isActive !== false
-        );
-      });
-
-      if (duplicate) {
-        return Swal.fire(
-          "Duplicate",
-          "Active product already exists.",
-          "warning",
-        );
-      }
-
-      const productData = {
-        productName,
-        brand,
-        location,
-        unitCost: Number(document.getElementById("addUnitCost").value),
-        sellingPrice: Number(document.getElementById("addSellingPrice").value),
-        stocksLeft: Number(document.getElementById("addStocksLeft").value),
-        isActive: true,
-        createdAt: serverTimestamp(),
-      };
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Adding...";
 
       try {
+        const productName = document
+          .getElementById("addProductName")
+          .value.trim();
+
+        const brand = document.getElementById("addBrand").value.trim();
+        const locationEl = document.getElementById("addLocation");
+
+        if (!locationEl) throw new Error("Location input missing");
+
+        const location = locationEl.value.trim();
+
+        const existingQuery = query(collection(db, "products"));
+        const snapshot = await getDocs(existingQuery);
+
+        const duplicate = snapshot.docs.find((d) => {
+          const data = d.data();
+          return (
+            data.productName?.toLowerCase() === productName.toLowerCase() &&
+            data.brand?.toLowerCase() === brand.toLowerCase() &&
+            data.isActive !== false
+          );
+        });
+
+        if (duplicate) {
+          Swal.fire("Duplicate", "Active product already exists.", "warning");
+          return;
+        }
+
+        const productData = {
+          productName,
+          brand,
+          location,
+          unitCost: Number(document.getElementById("addUnitCost").value),
+          sellingPrice: Number(
+            document.getElementById("addSellingPrice").value,
+          ),
+          stocksLeft: Number(document.getElementById("addStocksLeft").value),
+          isActive: true,
+          createdAt: serverTimestamp(),
+        };
+
         await addDoc(collection(db, "products"), productData);
 
         Swal.fire("Success", "Product added successfully.", "success");
 
         document.getElementById("addModal").style.visibility = "hidden";
         document.body.classList.remove("modal-open");
-
         e.target.reset();
       } catch (error) {
         console.error(error);
         Swal.fire("Error", "Failed to add product.", "error");
+      } finally {
+        isSubmitting = false;
+
+        const submitBtn = document
+          .getElementById("addProductForm")
+          .querySelector("button[type='submit']");
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Add Product";
       }
     });
+
+  let isEditing = false;
 
   document
     .getElementById("editProductForm")
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const id = document.getElementById("editProductId").value;
+      if (isEditing) return;
 
-      const productName = document
-        .getElementById("editProductName")
-        .value.trim();
-      const brand = document.getElementById("editBrand").value.trim();
+      const submitBtn = e.target.querySelector("button[type='submit']");
+      isEditing = true;
 
-      // check duplicates excluding current product
-      const snapshot = await getDocs(collection(db, "products"));
-
-      const duplicate = snapshot.docs.find((d) => {
-        if (d.id === id) return false;
-
-        const data = d.data();
-
-        return (
-          data.productName?.toLowerCase() === productName.toLowerCase() &&
-          data.brand?.toLowerCase() === brand.toLowerCase() &&
-          data.isActive !== false
-        );
-      });
-
-      if (duplicate) {
-        return Swal.fire(
-          "Duplicate",
-          "Another active product already exists.",
-          "warning",
-        );
-      }
-
-      const updatedData = {
-        productName: document.getElementById("editProductName").value,
-        brand: document.getElementById("editBrand").value,
-        location: document.getElementById("editLocation").value,
-        unitCost: Number(document.getElementById("editUnitCost").value),
-        sellingPrice: Number(document.getElementById("editSellingPrice").value),
-        stocksLeft: Number(document.getElementById("editStocksLeft").value),
-        isActive: true,
-      };
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Saving...";
 
       try {
+        const id = document.getElementById("editProductId").value;
+
+        const productName = document
+          .getElementById("editProductName")
+          .value.trim();
+
+        const brand = document.getElementById("editBrand").value.trim();
+
+        const location = document.getElementById("editLocation").value.trim();
+
+        if (!productName) {
+          Swal.fire("Error", "Product name is required", "warning");
+          return;
+        }
+        
+        const snapshot = await getDocs(collection(db, "products"));
+
+        const duplicate = snapshot.docs.find((d) => {
+          if (d.id === id) return false;
+
+          const data = d.data();
+
+          return (
+            data.isActive !== false &&
+            data.productName?.toLowerCase() === productName.toLowerCase() &&
+            data.brand?.toLowerCase() === brand.toLowerCase()
+          );
+        });
+
+        if (duplicate) {
+          Swal.fire(
+            "Duplicate",
+            "Another active product with same name and brand already exists.",
+            "warning",
+          );
+          return;
+        }
+
+        const updatedData = {
+          productName,
+          brand,
+          location,
+          unitCost: Number(document.getElementById("editUnitCost").value),
+          sellingPrice: Number(
+            document.getElementById("editSellingPrice").value,
+          ),
+          stocksLeft: Number(document.getElementById("editStocksLeft").value),
+          isActive: true,
+        };
+
         await setDoc(doc(db, "products", id), updatedData, { merge: true });
 
         Swal.fire("Updated", "Product updated successfully.", "success");
@@ -447,6 +488,12 @@ window.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         console.error(error);
         Swal.fire("Error", "Failed to update product.", "error");
+      } finally {
+        isEditing = false;
+
+        const submitBtn = e.target.querySelector("button[type='submit']");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Save Changes";
       }
     });
 });

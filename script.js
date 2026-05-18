@@ -331,44 +331,69 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("modal-open");
   });
 
-  document.getElementById("stockForm").addEventListener("submit", async (e) => {
+  const stockForm = document.getElementById("stockForm");
+
+  let isSubmitting = false;
+
+  stockForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const id = document.getElementById("stockProductId").value;
+    // PREVENT DOUBLE SUBMIT
+    if (isSubmitting) return;
 
-    const action = document.getElementById("stockAction").value;
+    isSubmitting = true;
 
-    const currentStock = Number(document.getElementById("currentStock").value);
+    const submitBtn = stockForm.querySelector(".submit-button");
 
-    const reason = document.getElementById("stockReason").value.trim();
+    const originalBtnText = submitBtn.innerHTML;
 
-    const quantity = Number(document.getElementById("stockQuantity").value);
-
-    if (quantity <= 0) {
-      return Swal.fire(
-        "Invalid Quantity",
-        "Quantity must be greater than 0.",
-        "warning",
-      );
-    }
-
-    let newStock = currentStock;
-
-    if (action === "add") {
-      newStock += quantity;
-    } else {
-      newStock -= quantity;
-
-      if (newStock < 0) {
-        return Swal.fire(
-          "Insufficient Stock",
-          "Stock cannot go below zero.",
-          "warning",
-        );
-      }
-    }
+    // DISABLE BUTTON + SHOW LOADING
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+    <i class="uil uil-spinner-alt spin"></i> Processing...
+  `;
 
     try {
+      const id = document.getElementById("stockProductId").value;
+
+      const action = document.getElementById("stockAction").value;
+
+      const currentStock = Number(
+        document.getElementById("currentStock").value,
+      );
+
+      const reason = document.getElementById("stockReason").value.trim();
+
+      const quantity = Number(document.getElementById("stockQuantity").value);
+
+      if (quantity <= 0) {
+        Swal.fire(
+          "Invalid Quantity",
+          "Quantity must be greater than 0.",
+          "warning",
+        );
+
+        return;
+      }
+
+      let newStock = currentStock;
+
+      if (action === "Add") {
+        newStock += quantity;
+      } else {
+        newStock -= quantity;
+
+        if (newStock < 0) {
+          Swal.fire(
+            "Insufficient Stock",
+            "Stock cannot go below zero.",
+            "warning",
+          );
+
+          return;
+        }
+      }
+
       await setDoc(
         doc(db, "products", id),
         {
@@ -379,15 +404,19 @@ window.addEventListener("DOMContentLoaded", () => {
       );
 
       const productRef = doc(db, "products", id);
+
       const productSnap = await getDoc(productRef);
 
       if (!productSnap.exists()) {
-        return Swal.fire("Error", "Product not found", "error");
+        Swal.fire("Error", "Product not found", "error");
+
+        return;
       }
 
       const product = productSnap.data();
 
       const adminRef = doc(db, "admins", auth.currentUser.uid);
+
       const adminSnap = await getDoc(adminRef);
 
       const adminName = adminSnap.exists()
@@ -407,17 +436,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
       Swal.fire(
         "Success",
-        `Stock successfully ${action === "add" ? "added" : "subtracted"}.`,
+        `Stock successfully ${action === "Add" ? "added" : "subtracted"}.`,
         "success",
       );
 
       document.getElementById("stockModal").style.visibility = "hidden";
 
       document.body.classList.remove("modal-open");
+
+      stockForm.reset();
     } catch (error) {
       console.error(error);
 
       Swal.fire("Error", "Failed to update stock.", "error");
+    } finally {
+      // ALWAYS RE-ENABLE BUTTON
+      isSubmitting = false;
+
+      submitBtn.disabled = false;
+
+      submitBtn.innerHTML = originalBtnText;
     }
   });
 });

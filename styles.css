@@ -639,6 +639,24 @@ body.modal-open {
 .submit-button:hover {
   background-color: var(--submit-btn-color);
 }
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 @keyframes fadeIn {
   from {
     opacity: 0;
